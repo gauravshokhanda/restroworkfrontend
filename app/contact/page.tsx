@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import { payloadAPI } from '../lib/payload';
+import { SEOHead } from '../components/SEOHead';
 
-interface FormData {
+interface ContactFormData {
   name: string;
   email: string;
-  company: string;
-  phone: string;
   subject: string;
   message: string;
 }
@@ -19,11 +19,9 @@ interface FormErrors {
 }
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
-    company: '',
-    phone: '',
     subject: '',
     message: ''
   });
@@ -80,27 +78,14 @@ export default function ContactPage() {
     setSubmitStatus('idle');
 
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      await payloadAPI.createContact(formData);
+      setSubmitStatus('success');
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
       });
-
-      if (response.ok) {
-        setSubmitStatus('success');
-        setFormData({
-          name: '',
-          email: '',
-          company: '',
-          phone: '',
-          subject: '',
-          message: ''
-        });
-      } else {
-        setSubmitStatus('error');
-      }
     } catch (error) {
       console.error('Error submitting form:', error);
       setSubmitStatus('error');
@@ -110,7 +95,13 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <SEOHead
+        title="Contact Us"
+        description="Get in touch with us. We'd love to hear from you and answer any questions you may have."
+        canonical="/contact"
+      />
+      <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-blue-600 to-purple-700 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -223,37 +214,7 @@ export default function ContactPage() {
                   {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
                 </div>
 
-                {/* Company and Phone Fields */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
-                      Company
-                    </label>
-                    <input
-                      type="text"
-                      id="company"
-                      name="company"
-                      value={formData.company}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                      placeholder="Your company name"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                      placeholder="Your phone number"
-                    />
-                  </div>
-                </div>
+
 
                 {/* Subject Field */}
                 <div>
@@ -340,5 +301,6 @@ export default function ContactPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
